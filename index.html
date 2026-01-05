@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
+      #error-log {
+        position: fixed; top: 0; left: 0; width: 100%; 
+        background: rgba(255,0,0,0.8); color: white; z-index: 100;
+        font-size: 12px; display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="error-log"></div>
+
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: yes; uiScanning: yes;" 
+             embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
+             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+      
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity id="mytarget" mindar-image-target="targetIndex: 0">
+         <a-circle color="blue" radius="0.5" opacity="0.5"></a-circle>
+      </a-entity>
+    </a-scene>
+
+    <script>
+      // Error Detection
+      window.onerror = function(msg, url, linenumber) {
+        const log = document.getElementById('error-log');
+        log.style.display = 'block';
+        log.innerHTML += '<p>Error: ' + msg + '</p>';
+        return false;
+      };
+
+      const target = document.querySelector('#mytarget');
+      target.addEventListener("targetFound", event => {
+        alert("Target Found! Redirecting to call...");
+        window.location.href = "tel:+1234567890";
+      });
+    </script>
+  </body>
+</html>
