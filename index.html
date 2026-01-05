@@ -1,46 +1,46 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      body { margin: 0; overflow: hidden; }
-      #error-log {
-        position: fixed; top: 0; left: 0; width: 100%; 
-        background: rgba(255,0,0,0.8); color: white; z-index: 100;
-        font-size: 12px; display: none;
-      }
+        body { margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; }
+        /* The UI needs to be above the AR canvas */
+        #call-overlay {
+            position: fixed; top: 20px; width: 100%; text-align: center; z-index: 9999;
+            display: none;
+        }
+        .btn {
+            background: #28a745; color: white; padding: 15px 30px; 
+            text-decoration: none; border-radius: 30px; font-family: sans-serif;
+        }
     </style>
-  </head>
-  <body>
-    <div id="error-log"></div>
+</head>
+<body>
+    <div id="call-overlay">
+        <a href="tel:+1234567890" class="btn">CALL NOW</a>
+    </div>
 
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: yes; uiScanning: yes;" 
-             embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
-             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-      
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-      <a-entity id="mytarget" mindar-image-target="targetIndex: 0">
-         <a-circle color="blue" radius="0.5" opacity="0.5"></a-circle>
-      </a-entity>
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind;" 
+             embedded vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-entity id="example-target" mindar-image-target="targetIndex: 0">
+            <a-plane color="green" opacity="0.5" position="0 0 0" height="1" width="1" rotation="0 0 0"></a-plane>
+        </a-entity>
     </a-scene>
 
     <script>
-      // Error Detection
-      window.onerror = function(msg, url, linenumber) {
-        const log = document.getElementById('error-log');
-        log.style.display = 'block';
-        log.innerHTML += '<p>Error: ' + msg + '</p>';
-        return false;
-      };
-
-      const target = document.querySelector('#mytarget');
-      target.addEventListener("targetFound", event => {
-        alert("Target Found! Redirecting to call...");
-        window.location.href = "tel:+1234567890";
-      });
+        const target = document.querySelector('#example-target');
+        const overlay = document.querySelector('#call-overlay');
+        
+        target.addEventListener("targetFound", () => {
+            overlay.style.display = "block";
+        });
+        
+        target.addEventListener("targetLost", () => {
+            overlay.style.display = "none";
+        });
     </script>
-  </body>
+</body>
 </html>
