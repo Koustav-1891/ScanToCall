@@ -1,45 +1,95 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Image Scan to Call</title>
+    
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
     <style>
-        body { margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; }
-        /* The UI needs to be above the AR canvas */
-        #call-overlay {
-            position: fixed; top: 20px; width: 100%; text-align: center; z-index: 9999;
-            display: none;
+        /* CRITICAL: Fixes the white screen/blank area issue */
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
         }
-        .btn {
-            background: #28a745; color: white; padding: 15px 30px; 
-            text-decoration: none; border-radius: 30px; font-family: sans-serif;
+
+        /* Forces the camera canvas to fill the entire mobile screen */
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* UI overlay for the Call Button */
+        #ui-layer {
+            position: fixed;
+            bottom: 40px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 9999; /* Ensure it stays above the camera */
+            pointer-events: none;
+        }
+
+        .call-button {
+            display: none; /* Only visible when image is scanned */
+            pointer-events: auto;
+            background-color: #28a745;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
-    <div id="call-overlay">
-        <a href="tel:+1234567890" class="btn">CALL NOW</a>
+
+    <div id="ui-layer">
+        <a id="btn" href="tel:+919749327111" class="call-button">CLICK TO CALL</a>
     </div>
 
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind;" 
-             embedded vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity id="example-target" mindar-image-target="targetIndex: 0">
-            <a-plane color="green" opacity="0.5" position="0 0 0" height="1" width="1" rotation="0 0 0"></a-plane>
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: no;" 
+        embedded 
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
+        
+        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: 10000; objects: .clickable"></a-camera>
+
+        <a-entity id="image-target" mindar-image-target="targetIndex: 0">
+            <a-gltf-model src="" rotation="0 0 0" position="0 0 0.1" scale="0.005 0.005 0.005"></a-gltf-model>
+            <a-plane color="#28a745" opacity="0.4" position="0 0 0" height="1" width="1"></a-plane>
         </a-entity>
     </a-scene>
 
     <script>
-        const target = document.querySelector('#example-target');
-        const overlay = document.querySelector('#call-overlay');
-        
-        target.addEventListener("targetFound", () => {
-            overlay.style.display = "block";
+        const targetEntity = document.querySelector('#image-target');
+        const callBtn = document.querySelector('#btn');
+
+        // When the camera "sees" your image
+        targetEntity.addEventListener("targetFound", event => {
+            console.log("Image found");
+            callBtn.style.display = "block";
         });
-        
-        target.addEventListener("targetLost", () => {
-            overlay.style.display = "none";
+
+        // When the camera loses the image
+        targetEntity.addEventListener("targetLost", event => {
+            console.log("Image lost");
+            callBtn.style.display = "none";
         });
     </script>
 </body>
